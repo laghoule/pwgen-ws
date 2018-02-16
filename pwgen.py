@@ -10,9 +10,11 @@ import string
 def pwgen(size: int) -> dict:
     """
     Generate a password of size "size"
+
     :param size: Password size
     :return: JSON of a generated password
     """
+
     chars = string.ascii_uppercase + string.digits
     return {'password': ''.join(random.choice(chars) for _ in range(size))}
 
