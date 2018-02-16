@@ -1,0 +1,29 @@
+swagger: "2.0"
+
+info:
+  title: "{{title}}"
+  version: "1.0"
+
+basePath: /v1.0
+
+paths:
+  /{size}:
+    post:
+      summary: Generate password
+      description: Generates password.
+      operationId: pwgen.pwgen
+      produces:
+        - application/json;
+      responses:
+        200:
+          description: Generated password
+          schema:
+            type: string
+          examples:
+            "application/json": {"password": "1JFVX1"}
+      parameters:
+        - name: size
+          in: path
+          description: Size of the generated password.
+          required: true
+          type: integer
