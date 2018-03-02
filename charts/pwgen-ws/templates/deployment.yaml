@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+
+spec:
+  replicas: {{ .Values.scaling.min_instance }} 
+  revisionHistoryLimit: 3
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        stage: {{ .Values.stage }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+      {{- if .Values.metrics.enabled }}
+      annotations:
+        "prometheus.io/scrape": "true"
+        "prometheus.io/port": "{{ .Values.metrics.port }}"
+      {{- end }}
+
+    spec:
+      containers:
+      - name: {{ template "fullname" . }}
+        image: "pgauthier2/{{ .Values.name }}:{{ .Values.tag }}"
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: {{ .Values.service.internal_port }}
+          protocol: TCP
+        - containerPort: {{ .Values.metrics.port }}
+          protocol: TCP
+
+        readinessProbe:
+          httpGet:
+            path: "/apidocs/"
+            port: {{ .Values.service.internal_port }}
+          periodSeconds: 5
+          initialDelaySeconds: 45
+          timeoutSeconds: 5
+
+        livenessProbe:
+          httpGet:
+            path: "/apidocs/"
+            port: {{ .Values.service.internal_port }}
+          periodSeconds: 5
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+
+        resources:
+          requests:
+            cpu: {{ .Values.resources.cpu }}
+            memory: {{ .Values.resources.memory }}
+          limits:
+            cpu: {{ .Values.resources.cpu }}
+            memory: {{ .Values.resources.memory }}
+
+      serviceAccountName: {{ template "fullname" . }} 

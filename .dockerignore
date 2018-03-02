@@ -1,0 +1,9 @@
+.git
+.idea
+Dockerfile
+__pycache__
+charts
+.drone.yml
+.drone.yml.sig
+.dockerignore
+.gitignore

@@ -1,0 +1,79 @@
+pipeline:
+
+  clone:
+    image: plugins/git:1.1
+    tags: true
+    skip_verify: true
+
+  publish_master_to_dockerhub:
+    image: plugins/docker:17.12
+    repo: pgauthier2/pwgen-ws
+    tags:
+      - latest
+      - ${DRONE_COMMIT}
+    secrets: [ docker_username, docker_password ]
+    when:
+      branch: master
+
+  publish_tag_to_dockerhub:
+    image: plugins/docker:17.12
+    repo: pgauthier2/pwgen-ws
+    tags: ${DRONE_TAG}
+    secrets: [ docker_username, docker_password ]
+    when:
+      event: tag
+
+  deploy_to_k8s_dev:
+    image: pgauthier2/drone-helm:k1.9.2-h2.7.2
+    skip_tls_verify: true
+    chart: ./charts/pwgen-ws
+    release: pwgen-ws
+    namespace: pwgen-ws
+    prefix: DEV
+    values:
+      - tag=${DRONE_COMMIT}
+      - stage=dev
+      - ingress.hostname=pwgen-ws-dev.stingray.com
+    secrets: [ DEV_API_SERVER, DEV_KUBERNETES_TOKEN, DEV_DOCKERCFG ]
+    upgrade: true
+    wait: true
+    debug: true
+    when:
+      event: push
+
+  deploy_to_k8s_stage:
+    image: pgauthier2/drone-helm:k1.9.2-h2.7.2
+    skip_tls_verify: true
+    chart: ./charts/pwgen-ws
+    release: pwgen-ws
+    namespace: pwgen-ws
+    prefix: DEV
+    values:
+      - tag=${DRONE_COMMIT_REF##refs/tags/}
+      - stage=stage
+      - ingress.hostname=pwgen-ws-stage.stingray.com
+    secrets: [ STAGE_API_SERVER, STAGE_KUBERNETES_TOKEN, STAGE_DOCKERCFG ]
+    upgrade: true
+    wait: true
+    debug: false
+    when:
+      event: tag
+
+  deploy_to_k8s_prod:
+    image: pgauthier2/drone-helm:k1.9.2-h2.7.2
+    skip_tls_verify: true
+    chart: ./charts/pwgen-ws
+    release: pwgen-ws
+    namespace: pwgen-ws
+    prefix: PROD
+    values:
+      - tag=${DRONE_COMMIT_REF##refs/tags/}
+      - stage=prod
+      - ingress.hostname=pwgen-ws.stingray.com
+    secrets: [ PROD_API_SERVER, PROD_KUBERNETES_TOKEN,  PROD_DOCKERCFG ]
+    upgrade: true
+    wait: true
+    debug: false
+    when:
+      event: deployment
+      environment: prod

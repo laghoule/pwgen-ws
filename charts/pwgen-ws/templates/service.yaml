@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+
+spec:
+  selector:
+    app: {{ template "fullname" . }}
+    stage: {{ .Values.stage }}
+  ports:
+    - protocol: "TCP"
+      port: {{ .Values.service.internal_port }}
+  type: {{ .Values.service.type }}

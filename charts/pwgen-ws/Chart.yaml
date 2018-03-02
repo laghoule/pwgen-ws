@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Microservice for generating password 
+name: pwgen-ws
+version: 0.1.0

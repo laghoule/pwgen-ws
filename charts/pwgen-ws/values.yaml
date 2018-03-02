@@ -1,0 +1,21 @@
+name: "pwgen-ws"
+tag: "latest"
+stage: "dev"
+metrics:
+  enabled: true
+  port: 5001
+resources:
+  cpu: "50m"
+  memory: "32Mi"
+scaling:
+  min_instance : "1"
+  max_instance: "4"
+  max_cpu: "75"
+ingress:
+  enabled: true
+  class: "traefik"
+  hostname: "pwgen-ws-dev.example.com"
+service:
+  type: "ClusterIP"
+  internal_port: 5000
+dockercfg: "NONE"

@@ -1,0 +1,59 @@
+tags:
+  - Password generator API
+
+parameters:
+  - name: ptype
+    in: path
+    type: string
+    required: true
+    description: type of password to generate
+  - name: size
+    in: query
+    type: integer
+    required: true
+    description: size of the generated password
+
+responses:
+  400:
+    description: Bad request
+    schema:
+      id: error400
+      properties:
+        error:
+          type: string
+          description: Description of the error
+          default: Bad request
+        code:
+          type: string
+          description: HTTP error code
+          default: "400"
+
+  500:
+    description: Internal server error
+    schema:
+      id: error500
+      properties:
+        error:
+          type: string
+          description: Description of the internal server error
+          default: Internal server error
+        code:
+          type: string
+          description: HTTP error code
+          default: "500"
+
+  200:
+    description: Password generated
+    schema:
+      id: password
+      properties:
+        password:
+          type: string
+          description: The generated password
+          default: Uuwuob9f
+        type:
+          type: array
+          description: Type of password generated
+          items:
+            type: string
+          default: ["alphabet", "numeric", "alphanumeric", "random"]
